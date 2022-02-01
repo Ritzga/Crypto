@@ -737,7 +737,7 @@ namespace Solver
         /// <param name="a">random a</param>
         /// <param name="beta">beta parameter</param>
         /// <param name="m">message</param>
-        /// <param name="k">chosen k between 0 and p-1</param>
+        /// <param name="k">chosen k between 0 and p-1 if greater then p or below 0 its p-1</param>
         public static void ElGamalSignSystem(int p, int alpha, int a, int beta, int m, int k)
         {
             Console.WriteLine("----ElGamal Signature schema----");
@@ -745,8 +745,13 @@ namespace Solver
                               "diese mit El-Gamal");
             Console.WriteLine("Identitätseigenschaft; nur Alice kennt das Geheminis a um zu signieren, ihre " +
                               "Identität wird durch ein vertrauenswürdiges Zertifikat bestätigt");
-            Console.WriteLine("Echtheit: ");
-            Console.WriteLine("Warneigenschaft: ");
+            Console.WriteLine("Echtheit: Diese stellt sicher, dass das Dokument wirklich vom " +
+                              "Unterschreibenden stammt. Hier wird gefordert, dass ein enger Zusammenhang " +
+                              "zwischen Dokument und Unterschrift besteht. Dies wird etwa dadurch erreicht, " +
+                              "dass die Unterschrift und die unterschriebene Erklärung auf demselben Blatt stehen.");
+            Console.WriteLine("Warneigenschaft: Diese soll den Unterzeichnenden vor einer Übereilung " +
+                              "bewahren. Die handschriftliche Unterschrift ist hinreichend komplex, und " +
+                              "besteht zum Beispiel nicht nur aus einem Kreuz");
             Console.WriteLine("Verifikationseigenschaft: Jeder Empfänger kann die Unterschrift, durch die Privat/Publik Schlüssel verifizieren.");
             if (k == 0 || k > p)
             {
