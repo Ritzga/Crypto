@@ -33,18 +33,18 @@ namespace Solver
             //RSA.Decrypt(new[] { 468,286,121,302,521 }, 19, 29, 101, 2);
             //RSA.EncryptDecrypt(new[] { 1754,0,0,1629 }, 59, 67, 3095, 2);
             //RSA.MultiplyAndSquare(1754, 47, 3953);
-            //RSA.PollardsRho(1763, 10, i => i*i + 1); //like y = f(x)= x^2 + 1
+            //RSA.PollardsRho(2021, 7, i => i*i + 1); //like y = f(x)= x^2 + 1
             //
             //DiscreteLogarithm.DiffieHellman(3457, 7, 990);
             //DiscreteLogarithm.ElGamalSignSystem(71, 11, 16, 2, 32);
-            //DiscreteLogarithm.ElGamalEncrypt(71, 11, 2, 32);
+            //DiscreteLogarithm.ElGamalEncrypt(71, 19, 8, 30, 11);
             //DiscreteLogarithm.ElGamalDecrypt(71, 16, 40, 20);
             //
             //EllipticCurve.IsPointInFunction(10, 19, 1, 6);
             //EllipticCurve.PointPlusPoint((10, 0), (10, 0), 19, 1, 6, true);
-            //EllipticCurve.NumberMultPoint(7, (10, 3), 19, 1, 6, true);
+            //EllipticCurve.NumberMultPoint(4, (11, 39), 167, 2, 1, true);
             //EllipticCurve.Encrypt(11, (2, 10), (2, 1), 1, 2, 2, 7);
-            EllipticCurve.Decrypt(19, 2, (10, 0), 3, 1, 6);
+            //EllipticCurve.Decrypt(19, 2, (10, 0), 3, 1, 6);
         }
     }
 
@@ -446,7 +446,7 @@ namespace Solver
         /// <param name="m">message to encrypt</param>
         /// <param name="p">first prime number</param>
         /// <param name="q">second prime number</param>
-        /// <param name="e">cyclic group</param>
+        /// <param name="e">cyclic group (exponent)</param>
         /// <param name="blockSize">block size</param>
         public static void Encrypt(string m, int p, int q, int e, int blockSize)
         {
@@ -503,7 +503,7 @@ namespace Solver
         /// <param name="m">cipher text to decrypt</param>
         /// <param name="p">first prime number</param>
         /// <param name="q">second prime number</param>
-        /// <param name="e">cyclic group</param>
+        /// <param name="e">cyclic group (exponent) of x^e mod (p*q)</param>
         /// <param name="blockSize">block size</param>
         public static void Decrypt(int[] m, int p, int q, int e, int blockSize)
         {
@@ -666,10 +666,10 @@ namespace Solver
                     Console.WriteLine();
                     Console.WriteLine("p=" + r);
                     Console.WriteLine("q=" + n / r);
-                    Console.WriteLine(" (Ja, das Verfahren bricht immer ab, da es nur endlich viele Zustände gibt. " +
+                    Console.WriteLine("Ja, das Verfahren bricht immer ab, da es nur endlich viele Zustände gibt. " +
                                       "Der Abbruch erfolgt, wenn der r=ggt(,) einen Wert > 1 ergibt. Dies ist ein Teiler " +
                                       "wenn r<n ist, sonst ist r=n und es muss ein Neustart mit anderer Initialisierung " +
-                                      "erfolgen.)");
+                                      "erfolgen.");
                     return (r, n / r);
                 }
 
@@ -709,23 +709,27 @@ namespace Solver
         /// <summary>
         /// Encryption of El Gamal system
         /// </summary>
-        /// <param name="p">selected p</param>
+        /// <param name="p">selected p (modulo)</param>
         /// <param name="alpha">alpha parameter</param>
         /// <param name="beta">beta parameter</param>
         /// <param name="m">message</param>
-        public static void ElGamalEncrypt(int p, int alpha, int beta, int m)
+        /// <param name="k">chosen number (secret key)</param>
+        public static void ElGamalEncrypt(int p, int alpha, int beta, int m, int k = 0)
         {
+            if (k == 0 || k > p - 1)
+            {
+                k = p - 2;
+            }
             Console.WriteLine("----ElGamal Encrypt----");
-            var k = p - 1; //k = 1 to p-1
             Console.WriteLine("k= " + k);
             Console.WriteLine("c1= " + (int)BigInteger.ModPow(alpha, k, p));
-            Console.WriteLine("c2= " + m * BigInteger.ModPow(beta, k, p));
+            Console.WriteLine("c2= " + (m * BigInteger.ModPow(beta, k, p)) % p);
         }
 
         /// <summary>
         /// Decryption of El Gamal system
         /// </summary>
-        /// <param name="p">selected p</param>
+        /// <param name="p">selected p (modulo)</param>
         /// <param name="a">random a</param>
         /// <param name="c1">cipher 1</param>
         /// <param name="c2">cipher 2</param>
