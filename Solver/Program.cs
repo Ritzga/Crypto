@@ -12,12 +12,15 @@ namespace Solver
         {
             //OneTimePad.Encrypt(new[] {1,0,0,0,0,1,1,0,0,0,0}, new[] { 0, 0, 0, 1, 1, 0, 1, 0, 1 });
             //OneTimePad.Decrypt(new[] {0,1,1,1,0,1,0,1,0,1,1,0,1}, new[] {0,0,0,1,0,0,1,0,0});
-            
+            //
+            //RSA.TryModInverse(27, 37, out var test);
+            //
             //BlockCipher.ECB(0b011, "101	110	010	011	001	111	100	000", 0b000, 0b111, 0b111);
             //BlockCipher.CBC(0b110, "111	110	011	010	001	100	101	000", 0b011, 0b111, 0b011, 0b011);
             //BlockCipher.CFB(0b011, "101	110	010	011	001	111	100	000", 0b001, 0b000, 0b111, 0b111);
             //BlockCipher.CTR(0b110, "100	111	010	011	101	001	110	000", 0b101, 0b011, 0b100, 0b100);
             //BlockCipher.OFB(0b100, "001	100	010	101	000	011	110	111", 0b011, 0b000, 0b000, 0b011);
+            //
             //Hash.MerkleDamgardConstruction(new[,]
             //{
             //    { 1, 1, 0, 0, 0, 1, 1 },
@@ -28,18 +31,20 @@ namespace Solver
             //
             //RSA.Encrypt("HTML", 23, 29, 9, 2);
             //RSA.Decrypt(new[] { 468,286,121,302,521 }, 19, 29, 101, 2);
-            //RSA.EncryptDecrypt(new[] { 1,864,756,756 }, 41, 47, 831, 2);
-            //RSA.MultiplyAndSquare(1, 31, 1927);
-            //RSA.PollardsRho(2021, 7, i => i*i + 1); //like y = f(x)= x^2 + 1
+            //RSA.EncryptDecrypt(new[] { 1754,0,0,1629 }, 59, 67, 3095, 2);
+            //RSA.MultiplyAndSquare(1754, 47, 3953);
+            //RSA.PollardsRho(1763, 10, i => i*i + 1); //like y = f(x)= x^2 + 1
             //
             //DiscreteLogarithm.DiffieHellman(3457, 7, 990);
-            //DiscreteLogarithm.ElGamalSignSystem(71, 11, 16, 2, 32, 11);
+            //DiscreteLogarithm.ElGamalSignSystem(71, 11, 16, 2, 32);
             //DiscreteLogarithm.ElGamalEncrypt(71, 11, 2, 32);
             //DiscreteLogarithm.ElGamalDecrypt(71, 16, 40, 20);
             //
-            //EllipticCurve.IsPointInFunction(11, 167, 2, 1);
-            //EllipticCurve.PointPlusPoint((11, 39), (6, 79), 167, 2, 1);
-            EllipticCurve.NumberMultPoint(4, (11, 39), 167, 2, 1);
+            //EllipticCurve.IsPointInFunction(10, 19, 1, 6);
+            //EllipticCurve.PointPlusPoint((10, 0), (10, 0), 19, 1, 6, true);
+            //EllipticCurve.NumberMultPoint(7, (10, 3), 19, 1, 6, true);
+            //EllipticCurve.Encrypt(11, (2, 10), (2, 1), 1, 2, 2, 7);
+            EllipticCurve.Decrypt(19, 2, (10, 0), 3, 1, 6);
         }
     }
 
@@ -572,7 +577,7 @@ namespace Solver
                 chars += IntToChar_0_25(numberChars[i]);
             }
 
-            Console.Write("Zeichenfolge in Zeichen: " + chars);
+            Console.Write("Zeichenfolge in Zeichen: " + chars + "\n");
             Console.WriteLine("Jeden Buchstaben direkt durch eine Zahl kodieren und diese verschlüsseln.");
             Console.WriteLine("p,q oder verschlüsselte Nachricht mit d,n oder φ(n) veröffentlichen.");
         }
@@ -661,6 +666,10 @@ namespace Solver
                     Console.WriteLine();
                     Console.WriteLine("p=" + r);
                     Console.WriteLine("q=" + n / r);
+                    Console.WriteLine(" (Ja, das Verfahren bricht immer ab, da es nur endlich viele Zustände gibt. " +
+                                      "Der Abbruch erfolgt, wenn der r=ggt(,) einen Wert > 1 ergibt. Dies ist ein Teiler " +
+                                      "wenn r<n ist, sonst ist r=n und es muss ein Neustart mit anderer Initialisierung " +
+                                      "erfolgen.)");
                     return (r, n / r);
                 }
 
@@ -738,24 +747,28 @@ namespace Solver
         /// <param name="beta">beta parameter</param>
         /// <param name="m">message</param>
         /// <param name="k">chosen k between 0 and p-1 if greater then p or below 0 its p-1</param>
-        public static void ElGamalSignSystem(int p, int alpha, int a, int beta, int m, int k)
+        public static void ElGamalSignSystem(int p, int alpha, int a, int beta, int m, int k = 0)
         {
             Console.WriteLine("----ElGamal Signature schema----");
             Console.WriteLine("Abschlusseigenschaft; Berechnen Hashwert der ganzen Nachricht und signieren " +
                               "diese mit El-Gamal");
             Console.WriteLine("Identitätseigenschaft; nur Alice kennt das Geheminis a um zu signieren, ihre " +
                               "Identität wird durch ein vertrauenswürdiges Zertifikat bestätigt");
-            Console.WriteLine("Echtheit: Diese stellt sicher, dass das Dokument wirklich vom " +
+            Console.WriteLine("Echtheit: Diese stellt sicher, dass das Dokument/die Nachricht wirklich vom " +
                               "Unterschreibenden stammt. Hier wird gefordert, dass ein enger Zusammenhang " +
-                              "zwischen Dokument und Unterschrift besteht. Dies wird etwa dadurch erreicht, " +
-                              "dass die Unterschrift und die unterschriebene Erklärung auf demselben Blatt stehen.");
+                              "zwischen Dokument und Unterschrift besteht.");
             Console.WriteLine("Warneigenschaft: Diese soll den Unterzeichnenden vor einer Übereilung " +
                               "bewahren. Die handschriftliche Unterschrift ist hinreichend komplex, und " +
                               "besteht zum Beispiel nicht nur aus einem Kreuz");
-            Console.WriteLine("Verifikationseigenschaft: Jeder Empfänger kann die Unterschrift, durch die Privat/Publik Schlüssel verifizieren.");
-            if (k == 0 || k > p)
+            Console.WriteLine("Verifikationseigenschaft: Jeder Empfänger kann die Unterschrift, durch die Privat/Publik " +
+                              "Schlüssel verifizieren.");
+            Console.WriteLine("Nachteile/Fehler: keine überprüfung der Sinnhaftigkeit der Nachricht, akzeptanz von " +
+                              "unterschriebenen Nachrichten");
+            Console.WriteLine("k mehrfach verwenden, weil damit versucht werden kann k zu ermitteln. " +
+                              "Da k = log_alpha(c1) = log_alpha(alpha^k)\nc2 = m * p^k mod p => m = c2 * (p^k)^-1 mod p");
+            if (k == 0 || k > p - 1)
             {
-                k = p - 1;
+                k = p - 2;
             }
             RSA.TryModInverse(k, p-1, out var modK);
             Console.WriteLine("k= " + k);
@@ -790,12 +803,14 @@ namespace Solver
         /// <param name="x">x position of the point</param>
         /// <param name="a">a of function parameter f(x) = y² = x³ ax + b</param>
         /// <param name="b">b of function parameter f(x) = y² = x³ ax + b</param>
-        public static void IsPointInFunction(int x, int m, int a, int b)
+        /// <returns>y if it exists</returns>
+        public static int IsPointInFunction(int x, int m, int a, int b)
         {
             Console.WriteLine("----Elliptic Curve Point ----");
             int F(int i) => i * i * i + a * i + b; //f(x) = y = x^3 + 2x + 1
             var point = ModularSqrt(F(x) % m, m);
             Console.WriteLine("Point (" + x + ",y) => y = " + (point == -1 ? "n": point));
+            return point;
         }
         
         /// <summary>
@@ -911,8 +926,12 @@ namespace Solver
         /// <param name="a">a of function parameter f(x) = y = ax + b</param>
         /// <param name="b">b of function parameter f(x) = y = ax + b</param>
         /// <returns>sum on the two points</returns>
-        public static (int, int) PointPlusPoint((int, int) p1, (int, int) p2, int m, int a, int b)
+        public static (int, int) PointPlusPoint((int, int) p1, (int, int) p2, int m, int a, int b, bool single = false)
         {
+            if (single)
+            {
+                Console.WriteLine("----Elliptic Curves - point plus point ----");
+            }
             int F(int i) => (i * i * i + a * i + b) % m; //f(x) = y = x^3 + 2x + 1
 
             int x3 = 0, y3 = 0, lambda = 0;
@@ -922,7 +941,7 @@ namespace Solver
             {
                 Console.WriteLine("lambda = ?");
                 Console.WriteLine("p3(x,y) = O");
-                return (0, 0);
+                return (-1, -1);
             }
             //case 2
             if (p1.Item1 != p2.Item1)
@@ -945,55 +964,96 @@ namespace Solver
             {
                 Console.WriteLine("lambda = ?");
                 Console.WriteLine("p3(x,y) = O");
-                return (0, 0);
+                return (-1, -1);
             }
             
+            
             Console.WriteLine("lambda = " + lambda);
-            Console.WriteLine("p3(x,y) = (" + x3 + ", " + Mod(y3, m) + ")");
-            return (x3, y3);
+            if (single)
+            {
+                Console.WriteLine("p3(x,y) = (" + x3 + ", " + Mod(y3, m) + ")");
+            }
+            
+            return (x3, Mod(y3, m));
         }
         
+
         /// <summary>
         /// Calculate point multiply by number on elliptic curves
         /// </summary>
         /// <param name="number">multiply the point by number</param>
-        /// <param name="p">point </param>
+        /// <param name="p">point to multiply with</param>
         /// <param name="m">modulo (Z-space)</param>
-        /// <param name="a">a of function parameter f(x) = y = ax + b</param>
-        /// <param name="b">b of function parameter f(x) = y = ax + b</param>
-        public static void NumberMultPoint(int number, (int, int) p, int m, int a, int b)
+        /// <param name="a">a of function parameter f(x) = y^2 = x^3 ax + b</param>
+        /// <param name="b">b of function parameter f(x) = y^2 = x^3 ax + b</param>
+        /// <returns></returns>
+        public static (int, int) NumberMultPoint(int number, (int, int) p, int m, int a, int b, bool single = false)
         {
+            if (single)
+            {
+                Console.WriteLine("----Elliptic Curves - point multiply by number ----");
+            }
             var newPoint = p;
             for (var i = 1; i < number; i++)
             {
                 //point + point + point + point
                 //1 + 1 + 1 + 1
                 newPoint = PointPlusPoint(p, newPoint, m, a, b);
+                if (newPoint == (-1, -1))
+                {
+                    Console.WriteLine(i+"P("+p.Item1+", "+p.Item2+")=O");
+                }
+                Console.WriteLine(i+"P=("+newPoint.Item1 + ", "+newPoint.Item2 + ")");
             }
+            return newPoint;
         }
 
         /// <summary>
         /// Perform encryption on elliptic curves
         /// </summary>
-        /// <param name="p"></param>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="point"></param>
-        public static void Encrypt(int p, int a, int b, (int, int) point)
+        /// <param name="p">modulo (Z-space)</param>
+        /// <param name="P">point 1 (x,y)</param>
+        /// <param name="Q">point 2 (x,y)</param>
+        /// <param name="a">a of function parameter f(x) = y^2 = x^3 ax + b</param>
+        /// <param name="b">b of function parameter f(x) = y^2 = x^3 ax + b</param>
+        /// <param name="m">message to encrypt</param>
+        /// <param name="k">chosen k (secret key)</param>
+        public static void Encrypt(int p, (int, int) P, (int, int) Q, int a, int b, int m, int k)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("----Elliptic Curves - El gamal encrypt ----");
+            
+            var kP = NumberMultPoint(k, P, p, a, b);
+            var c1 = (kP.Item1, kP.Item2 % 2);
+            Console.WriteLine(k  + "P(" + P.Item1 + ", " + P.Item2 + ")=(" +kP.Item1 + ", " + kP.Item2 + ")\n");
+            var kQ = NumberMultPoint(k, Q, p, a, b);
+            Console.WriteLine(k  + "Q(" + Q.Item1 + ", " + Q.Item2 + ")=(" +kQ.Item1 + ", " + kQ.Item2 + ")\n");
+            var c2 = (m + (kQ.Item1 + kQ.Item2 ) % p ) % p;
+            Console.WriteLine("c1 = ["+ c1.Item1 + ", "+ c1.Item2 + "]");
+            Console.WriteLine("c2 = " + c2);
         }
-        
+   
         /// <summary>
         /// Perform decryption on elliptic curves
         /// </summary>
-        /// <param name="p"></param>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="point"></param>       
-        public static void Decrypt(int p, int a, int b, (int, int) point)
+        /// <param name="p">modulo (Z-space)</param>
+        /// <param name="r">chosen r (secret key)</param>
+        /// <param name="c1">cipher key 1 (point)</param>
+        /// <param name="c2">cipher key</param>
+        /// <param name="a">a of function parameter f(x) = y^2 = x^3 ax + b</param>
+        /// <param name="b">b of function parameter f(x) = y^2 = x^3 ax + b</param>
+        public static void Decrypt(int p, int r, (int, int) c1, int c2, int a, int b)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("----Elliptic Curves - El gamal decrypt ----");
+            var c1Square = IsPointInFunction(c1.Item1, p, a, b);
+            if (c1Square != -1)
+            {
+                var newPoint = (c1.Item1, c1Square);
+                var point = PointPlusPoint(newPoint, newPoint, p, a, b, true);
+                var m = Mod(c2 - point.Item1 - point.Item2, p);
+                Console.WriteLine("m = " + m);
+                return;
+            }
+            Console.WriteLine("Error!");
         }
     }
 }
