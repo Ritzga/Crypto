@@ -15,10 +15,10 @@ namespace Solver
             //
             //RSA.TryModInverse(27, 37, out var test);
             //
-            //BlockCipher.ECB(0b011, "101	110	010	011	001	111	100	000", 0b000, 0b111, 0b111);
-            //BlockCipher.CBC(0b110, "111	110	011	010	001	100	101	000", 0b011, 0b111, 0b011, 0b011);
+            //BlockCipher.ECB(0b011, "000	100	010	110	001	101	011	111", 0b110, 0b110, 0b011);
+            //BlockCipher.CBC(0b011, "000	100	010	110	001	101	011	111", 0b110, 0b110, 0b110, 0b011);
             //BlockCipher.CFB(0b011, "101	110	010	011	001	111	100	000", 0b001, 0b000, 0b111, 0b111);
-            //BlockCipher.CTR(0b110, "100	111	010	011	101	001	110	000", 0b101, 0b011, 0b100, 0b100);
+            //BlockCipher.CTR(0b101, "100	000	110	010	101	001	111	011", 0b010, 0b111, 0b010, 0b010);
             //BlockCipher.OFB(0b100, "001	100	010	101	000	011	110	111", 0b011, 0b000, 0b000, 0b011);
             //
             //Hash.MerkleDamgardConstruction(new[,]
@@ -31,18 +31,18 @@ namespace Solver
             //
             //RSA.Encrypt("HTML", 23, 29, 9, 2);
             //RSA.Decrypt(new[] { 468,286,121,302,521 }, 19, 29, 101, 2);
-            //RSA.EncryptDecrypt(new[] { 1754,0,0,1629 }, 59, 67, 3095, 2);
-            //RSA.MultiplyAndSquare(1754, 47, 3953);
-            //RSA.PollardsRho(2021, 7, i => i*i + 1); //like y = f(x)= x^2 + 1
+            //RSA.EncryptDecrypt(new[] { 16,13,12,16 }, 3, 7, 5, 2);
+            //RSA.MultiplyAndSquare(16, 5, 21);
+            RSA.PollardsRho(2279, 5, i => i*i + 1); //like y = f(x)= x^2 + 1
             //
             //DiscreteLogarithm.DiffieHellman(3457, 7, 990);
-            //DiscreteLogarithm.ElGamalSignSystem(71, 11, 16, 2, 32);
             //DiscreteLogarithm.ElGamalEncrypt(71, 19, 8, 30, 11);
             //DiscreteLogarithm.ElGamalDecrypt(71, 16, 40, 20);
+            //DiscreteLogarithm.ElGamalSignSystem(79,12,16,10, 33, 17);
             //
-            //EllipticCurve.IsPointInFunction(10, 19, 1, 6);
-            //EllipticCurve.PointPlusPoint((10, 0), (10, 0), 19, 1, 6, true);
-            //EllipticCurve.NumberMultPoint(4, (11, 39), 167, 2, 1, true);
+            //EllipticCurve.IsPointInFunction(1, 263, 2, 3, true);
+            //EllipticCurve.PointPlusPoint((4, 148), (5, 140), 263, 2, 3, true);
+            //EllipticCurve.NumberMultPoint(4, (4, 148), 263, 2, 3, true);
             //EllipticCurve.Encrypt(11, (2, 10), (2, 1), 1, 2, 2, 7);
             //EllipticCurve.Decrypt(19, 2, (10, 0), 3, 1, 6);
         }
@@ -587,9 +587,9 @@ namespace Solver
         /// </summary>
         /// <param name="m1">message</param>
         /// <param name="d">second part of public key</param>
-        /// <param name="m">Modulo</param>
+        /// <param name="n">modulo number (p*q)</param>
         /// <returns></returns>
-        public static int MultiplyAndSquare(int m1, int d, int m)
+        public static int MultiplyAndSquare(int m1, int d, int n)
         {
             Console.WriteLine("----RSA MultiplyAndSquare----");
             var r = 1;
@@ -600,10 +600,10 @@ namespace Solver
             {
                 if (bbin[i] == '1')
                 {
-                    r = (r * m1) % m;
+                    r = (r * m1) % n;
                 }
 
-                m1 = ((int)BigInteger.Pow(m1, 2)) % m;
+                m1 = ((int)BigInteger.Pow(m1, 2)) % n;
                 Console.Write(bbin[i] + ", ");
                 Console.Write(r + ", ");
                 Console.Write(m1 + ", ");
@@ -653,33 +653,57 @@ namespace Solver
             Console.WriteLine("----PollardsRho----");
             var xi = f(x0) % n;
             var x2i = f(xi) % n;
+            var di = Mod(x2i - xi, n);
+            var r = GCD(di, n);
+            Console.WriteLine();
             Console.Write(xi + ", ");
             Console.Write(x2i + ", ");
-            while (xi != x2i)
+            Console.Write(di + ", ");
+            Console.Write(r);
+            while (xi != x2i && r == 1)
             {
-                var di = Mod(x2i - xi, n);
-                var r = GCD(di, n);
+                xi = f(xi) % n;
+                x2i = f(f(x2i) % n) % n;
+                di = Mod(x2i - xi, n);
+                r = GCD(di, n);
+                Console.WriteLine();
+                Console.Write(xi + ", ");
+                Console.Write(x2i + ", ");
                 Console.Write(di + ", ");
                 Console.Write(r);
                 if (r > 1)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("p=" + r);
-                    Console.WriteLine("q=" + n / r);
+                    //proof (but very stupid!)
+                    var proof = r;
+                    var a = n;
+                    for (var b = 2; a > 1; b++)
+                    {
+                        if (a % b != 0) continue;
+                        while (a % b == 0)
+                        {
+                            a /= b;
+                        }
+                        proof = b;
+                        break;
+                    }
+                    if (proof != r && proof != n / r)
+                    {
+                        Console.WriteLine("\nwarning there is an error in calc!");
+                        Console.WriteLine("proof says: p=" + proof + ", q=" + n / proof);
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("p=" + r);
+                        Console.WriteLine("q=" + n / r);
+                    }
                     Console.WriteLine("Ja, das Verfahren bricht immer ab, da es nur endlich viele Zustände gibt. " +
                                       "Der Abbruch erfolgt, wenn der r=ggt(,) einen Wert > 1 ergibt. Dies ist ein Teiler " +
                                       "wenn r<n ist, sonst ist r=n und es muss ein Neustart mit anderer Initialisierung " +
                                       "erfolgen.");
                     return (r, n / r);
                 }
-
-                xi = f(xi) % n;
-                x2i = f(f(x2i) % n) % n;
-                Console.WriteLine();
-                Console.Write(xi + ", ");
-                Console.Write(x2i + ", ");
             }
-
             return (n, 1);
         }
     }
@@ -781,8 +805,7 @@ namespace Solver
             Console.WriteLine("delta= " + delta);
             var gamma = RSA.Mod((m - a * delta) * modK, p-1);
             Console.WriteLine("gamma= " + gamma);
-            Console.WriteLine("Verification is "+
-                BigInteger.Pow(beta, delta)*BigInteger.Pow(delta, gamma) % p + " = " + (int)BigInteger.ModPow(alpha, m, p));
+            Console.WriteLine("Verification is " +  "mod(" + beta + "^" + delta  + " * " + delta + "^" + gamma + " , " + p + ") = " + (int)BigInteger.ModPow(alpha, m, p));
         }
     }
     
@@ -799,24 +822,35 @@ namespace Solver
             var r = x % m;
             return r < 0 ? r + m : r;
         }
-        
+
         /// <summary>
         /// Check if the point is on the function
         /// </summary>
-        /// <param name="m">modulo number (Z-space) alias f</param>
         /// <param name="x">x position of the point</param>
+        /// <param name="m">modulo number (Z-space) alias f</param>
         /// <param name="a">a of function parameter f(x) = y² = x³ ax + b</param>
         /// <param name="b">b of function parameter f(x) = y² = x³ ax + b</param>
+        /// <param name="single"></param>
         /// <returns>y if it exists</returns>
-        public static int IsPointInFunction(int x, int m, int a, int b)
+        public static int IsPointInFunction(int x, int m, int a, int b, bool single = false)
         {
-            Console.WriteLine("----Elliptic Curve Point ----");
+            if (single)
+            {
+                Console.WriteLine("----Elliptic Curve Point ----");
+            }
             int F(int i) => i * i * i + a * i + b; //f(x) = y = x^3 + 2x + 1
-            var point = ModularSqrt(F(x) % m, m);
-            Console.WriteLine("Point (" + x + ",y) => y = " + (point == -1 ? "n": point));
-            return point;
+            var z = F(x) % m;
+            var y2 = ModularSqrt(F(x) % m, m);
+            var y2Minus = Mod(-y2, m);
+
+            if (single)
+            {
+                Console.WriteLine("Point (" + x + ",y) => y = " + (y2 * y2 % m != z ? "n": y2));
+                Console.WriteLine("Point (" + x + ",-y) => y = " + (y2Minus * y2Minus % m != z ? "n": y2Minus));
+            }
+            return y2;
         }
-        
+
         /// <summary>
         /// Calculate the modular square of a number
         /// </summary>
@@ -952,25 +986,35 @@ namespace Solver
             {
                 RSA.TryModInverse(Mod(p2.Item1 - p1.Item1, m), m, out var mod);
                 lambda = Mod(Mod(p2.Item2 - p1.Item2, m) * mod, m);
-                x3 = Mod(lambda * lambda - p1.Item1 - p2.Item1 , m); 
+                x3 = Mod(lambda * lambda - p1.Item1 - p2.Item1, m);
                 y3 = Mod(lambda * (p1.Item1 - x3) - p1.Item2, m);
+
+                Console.WriteLine($"lambda = mod(mod({p2.Item2} - {p1.Item2}, {m}) * inv_mod(mod({p2.Item1} - {p1.Item1}, {m}), {m}) , {m})");
+                Console.WriteLine($"x3 = mod({lambda} * {lambda} - {p1.Item1} - {p2.Item1}, {m})");
+                Console.WriteLine($"y3 = mod({lambda} * ({p1.Item1} - {x3}) - {p1.Item2}, {m})");
             }
             //case 4
             else if (p1.Item1 == p2.Item1 && p1.Item2 != -p2.Item2)
             {
                 RSA.TryModInverse((2 * p1.Item2 % m), m, out var mod);
                 lambda = Mod((3 * p1.Item1 * p1.Item1 + a) % m * mod, m);
-                x3 = Mod(lambda * lambda - p1.Item1 - p2.Item1, m); 
+                x3 = Mod(lambda * lambda - p1.Item1 - p2.Item1, m);
                 y3 = Mod(lambda * (p1.Item1 - x3) - p1.Item2, m);
+
+                Console.WriteLine($"lambda = mod(mod(3 * {p1.Item1} * {p1.Item1} + {a} , {m}) * inv_mod(mod(2 * {p1.Item2}, {m} ) , {m}), {m})");
+                Console.WriteLine($"x3 = mod({lambda} * {lambda} - {p1.Item1} - {p2.Item1}, {m})");
+                Console.WriteLine($"y3 = mod({lambda} * ({p1.Item1} - {x3}) - {p1.Item2}, {m})");
             }
 
-            if (y3*y3 % m != F(x3))
+            var z = F(x3);
+            var y3minus = Mod(-y3, m);
+            var test = IsPointInFunction(x3, m, a, b);
+            if (z != y3*y3 % m && y3minus*y3minus % m != z)
             {
                 Console.WriteLine("lambda = ?");
                 Console.WriteLine("p3(x,y) = O");
                 return (-1, -1);
             }
-            
             
             Console.WriteLine("lambda = " + lambda);
             if (single)
