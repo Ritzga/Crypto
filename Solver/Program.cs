@@ -510,7 +510,7 @@ namespace Solver
             Console.WriteLine("----RSA Decrypt----");
             var n = p * q;
             var phi = (p - 1) * (q - 1);
-            var d = (phi + 1) / e; // d * e = phi + 1 ==> 1 mod phi
+            TryModInverse(e, phi, out var d);
             Console.WriteLine("d=" + d);
             Console.Write("Zahlenpaarfolge: ");
             var numberChars = new int[m.Length];
@@ -876,7 +876,7 @@ namespace Solver
             {
                 return m;
             }
-            if (m % 4 == 3) 
+            if (m % 4 == 3)
             {
                 return (int)BigInteger.ModPow(a, (m + 1) / 4, m);
             }
@@ -954,7 +954,7 @@ namespace Solver
             var ls = (int)BigInteger.ModPow(a, (p - 1) / 2, p);
             return ls == p - 1 ? -1 : ls;
         }
-
+        
         /// <summary>
         /// Calculate point plus point operation on elliptic curves
         /// </summary>
