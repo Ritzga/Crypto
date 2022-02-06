@@ -801,11 +801,11 @@ namespace Solver
             RSA.TryModInverse(k, p-1, out var modK);
             Console.WriteLine("k= " + k);
             Console.WriteLine("k^-1= " + modK);
-            var delta = (int)BigInteger.ModPow(alpha, k, p);
-            Console.WriteLine("delta= " + delta);
-            var gamma = RSA.Mod((m - a * delta) * modK, p-1);
+            var gamma = (int)BigInteger.ModPow(alpha, k, p);
             Console.WriteLine("gamma= " + gamma);
-            Console.WriteLine("Verification is " +  "mod(" + beta + "^" + delta  + " * " + delta + "^" + gamma + " , " + p + ") = " + (int)BigInteger.ModPow(alpha, m, p));
+            var delta = RSA.Mod((m - a * gamma) * modK, p-1);
+            Console.WriteLine("delta= " + delta);
+            Console.WriteLine("Verification is " +  "mod(" + beta + "^" + gamma  + " * " + gamma + "^" + delta + " , " + p + ") = " + (int)BigInteger.ModPow(alpha, m, p));
         }
     }
     
@@ -1096,7 +1096,7 @@ namespace Solver
             if (c1Square != -1)
             {
                 var newPoint = (c1.Item1, c1Square);
-                var point = PointPlusPoint(newPoint, newPoint, p, a, b, true);
+                var point = NumberMultPoint(r, newPoint, p, a, b);
                 var m = Mod(c2 - point.Item1 - point.Item2, p);
                 Console.WriteLine("m = " + m);
                 return;
