@@ -975,7 +975,7 @@ namespace Solver
             int x3 = 0, y3 = 0, lambda = 0;
 
             //case 3
-            if (p1.Item1 == p2.Item1 && p1.Item2 == -p2.Item2)
+            if (p1.Item1 == p2.Item1 && p1.Item2 == Mod(-p2.Item2, m))
             {
                 Console.WriteLine("lambda = ?");
                 Console.WriteLine("p3(x,y) = O");
@@ -994,7 +994,7 @@ namespace Solver
                 Console.WriteLine($"y3 = mod({lambda} * ({p1.Item1} - {x3}) - {p1.Item2}, {m})");
             }
             //case 4
-            else if (p1.Item1 == p2.Item1 && p1.Item2 != -p2.Item2)
+            else if (p1.Item1 == p2.Item1 && p1.Item2 != Mod(-p2.Item2, m))
             {
                 RSA.TryModInverse((2 * p1.Item2 % m), m, out var mod);
                 lambda = Mod((3 * p1.Item1 * p1.Item1 + a) % m * mod, m);
