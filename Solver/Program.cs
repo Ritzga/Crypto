@@ -33,7 +33,7 @@ namespace Solver
             //RSA.Decrypt(new[] { 468,286,121,302,521 }, 19, 29, 101, 2);
             //RSA.EncryptDecrypt(new[] { 16,13,12,16 }, 3, 7, 5, 2);
             //RSA.MultiplyAndSquare(16, 5, 21);
-            RSA.PollardsRho(2279, 5, i => i*i + 1); //like y = f(x)= x^2 + 1
+            //RSA.PollardsRho(2279, 5, i => i*i + 1); //like y = f(x)= x^2 + 1
             //
             //DiscreteLogarithm.DiffieHellman(3457, 7, 990);
             //DiscreteLogarithm.ElGamalEncrypt(71, 19, 8, 30, 11);
@@ -65,11 +65,6 @@ namespace Solver
                 m[i] ^= k[i];
             }
             Console.WriteLine("c= " + string.Join("", m));
-            Console.WriteLine("Informationstheoretisch gegen Kryptanalyse sicher und kann nicht entziffert werden, " +
-                              "wenn der Schlüssel genauso lang ist wie die Nachricht und aus Zeichen besteht, die " +
-                              "zufällig und unabhängig sind, und wenn er nur einmal zur Verschlüsselung verwendet wird.");
-            Console.WriteLine("Der Schlüssel muss aus echten Zufallsziffern bestehen; keine Mehrfachnutzung des " +
-                              "Schlüssels, kein Preisgeben des Schlüssels");
         }
 
         /// <summary>
@@ -87,12 +82,6 @@ namespace Solver
                 c[i] ^= k[i];
             }
             Console.WriteLine("m= " + string.Join("", c));
-            Console.WriteLine("Eine Known-Plaintext-Attacke bedeutet, dass ein Angreifer Zugang sowohl zum Klartext " +
-                              "m als auch zum Geheimtext c hat.");
-            Console.WriteLine("Wenn Oskar sowohl einen Klartext m als auch einen Geheimtext c kennt, dann kann er " +
-                              "durch K:=m xor c den benutzten Schlüssel K berechnen. Begehen Alice und Bob den Fehler, " +
-                              "den gleichen Schlüssel K mehrfach zu verwenden, dann kann Oskar alle diese Chiffren c " +
-                              "durch c xor K entschlüsseln.");
         }
     }
 
@@ -134,9 +123,6 @@ namespace Solver
         public static void ECB(int xor, string ps, params int[] m)
         {
             Console.WriteLine("----BlockCipher ECB----");
-            Console.WriteLine(
-                "Effizient berechenbar, aber Reihenfolge der chiffrierten Blöcke kann unbemerkt verändert werden; " +
-                "gleiche Klartextblöcke werden durch gleiche Codeblöche chiffriert");
             var numbers = StringToNumbers(ps);
             
             for (var i = 0; i < m.Length; i++)
@@ -155,9 +141,6 @@ namespace Solver
         public static void CBC(int xor, string ps, int c0, params int[] m)
         {
             Console.WriteLine("----BlockCipher CBC----");
-            Console.WriteLine(
-                "Reihenfolge der chiffrierten Blöcke kann nicht unbemerkt verändert werden; gleiche Klartextblöcke " +
-                "werden durch verschiedene Codeblöche chiffriert");
             var numbers = StringToNumbers(ps);
             var ci = c0;
             Console.WriteLine("c0= " + Convert.ToString(ci, 2).PadLeft(3, '0'));
@@ -179,10 +162,6 @@ namespace Solver
         public static void CFB(int xor, string ps, int c0, params int[] m)
         {
             Console.WriteLine("----BlockCipher CFB----");
-            Console.WriteLine(
-                "Reihenfolge der chiffrierten Blöcke kann nicht unbemerkt verändert werden; gleiche Klartextblöcke" +
-                " werden durch verschiedene Codeblöcke chiffriert; Effiziente Implementierung, da Ver- und " +
-                "Entschlüsseln gleich sind");
             var numbers = StringToNumbers(ps);
             var ci = c0;
             var cString = Convert.ToString(ci, 2).PadLeft(3, '0');
@@ -211,9 +190,6 @@ namespace Solver
         public static void CTR(int xor, string ps, int c0, params int[] m)
         {
             Console.WriteLine("----BlockCipher CTR----");
-            Console.WriteLine(
-                "Reihenfolge der chiffrierten Blöcke kann nicht unbemerkt verändert werden; gleiche Klartextblöcke " +
-                "werden durch verschiedene Codeblöcke chiffriert, leichte Parallelisierbarkeit");
             var numbers = StringToNumbers(ps);
             var ci = c0;
             var cString = Convert.ToString(ci, 2).PadLeft(3, '0');
@@ -243,10 +219,6 @@ namespace Solver
         public static void OFB(int xor, string ps, int c0, params int[] m)
         {
             Console.WriteLine("----BlockCipher OFB----");
-            Console.WriteLine(
-                "Reihenfolge der chiffrierten Blöcke kann nicht unbemerkt verändert werden; gleiche Klartextblöcke " +
-                "werden durch verschiedene Codeblöcke chiffriert; Effiziente Implementierung, da Ver- und " +
-                "Entschlüsseln gleich sind; Schlüsselstrom kann vorab berechnet werden bei bekanntem c0");
             var numbers = StringToNumbers(ps);
             var ci = c0;
             var cString = Convert.ToString(ci, 2).PadLeft(3, '0');
@@ -285,7 +257,6 @@ namespace Solver
             {
                 padding += "0";
             }
-
             padding += Convert.ToInt32(zeroAdd.ToString(), 2).ToString();
             Console.WriteLine("Padding: " + padding);
             var next = z0;
@@ -577,9 +548,7 @@ namespace Solver
                 chars += IntToChar_0_25(numberChars[i]);
             }
 
-            Console.Write("Zeichenfolge in Zeichen: " + chars + "\n");
-            Console.WriteLine("Jeden Buchstaben direkt durch eine Zahl kodieren und diese verschlüsseln.");
-            Console.WriteLine("p,q oder verschlüsselte Nachricht mit d,n oder φ(n) veröffentlichen.");
+            Console.Write("String in chars: " + chars + "\n");
         }
         
         /// <summary>
@@ -697,10 +666,6 @@ namespace Solver
                         Console.WriteLine("p=" + r);
                         Console.WriteLine("q=" + n / r);
                     }
-                    Console.WriteLine("Ja, das Verfahren bricht immer ab, da es nur endlich viele Zustände gibt. " +
-                                      "Der Abbruch erfolgt, wenn der r=ggt(,) einen Wert > 1 ergibt. Dies ist ein Teiler " +
-                                      "wenn r<n ist, sonst ist r=n und es muss ein Neustart mit anderer Initialisierung " +
-                                      "erfolgen.");
                     return (r, n / r);
                 }
             }
@@ -726,8 +691,6 @@ namespace Solver
             Console.WriteLine("b= " + b);
             Console.WriteLine("lb= " + lb);
             Console.WriteLine("K=" + BigInteger.ModPow(lb, a, p));
-            Console.WriteLine("Man-in-the-Middle Angriff um lb und la zu zu empfangen oder die Schlüssel selbst zu bestimmen.");
-            Console.WriteLine("Eine Kombination aus Schlüsselvereinbarung und Digitaler Unterschrift kann einen Man-in-the-Middle Angriff erkennen.");
         }
 
         /// <summary>
@@ -762,8 +725,6 @@ namespace Solver
             Console.WriteLine("----ElGamal Decrypt----");
             RSA.TryModInverse((int)BigInteger.ModPow(c1, a, p), p, out var mod1);
             Console.WriteLine("m'= " + (c2 * mod1) % p);
-            Console.WriteLine("k mehrfach verwenden, weil damit versucht werden kann k zu ermitteln. " +
-                              "Da k = log_alpha(c1) = log_alpha(alpha^k)\nc2 = m * p^k mod p => m = c2 * (p^k)^-1 mod p");
         }
 
         /// <summary>
@@ -778,22 +739,6 @@ namespace Solver
         public static void ElGamalSignSystem(int p, int alpha, int a, int beta, int m, int k = 0)
         {
             Console.WriteLine("----ElGamal Signature schema----");
-            Console.WriteLine("Abschlusseigenschaft; Berechnen Hashwert der ganzen Nachricht und signieren " +
-                              "diese mit El-Gamal");
-            Console.WriteLine("Identitätseigenschaft; nur Alice kennt das Geheminis a um zu signieren, ihre " +
-                              "Identität wird durch ein vertrauenswürdiges Zertifikat bestätigt");
-            Console.WriteLine("Echtheit: Diese stellt sicher, dass das Dokument/die Nachricht wirklich vom " +
-                              "Unterschreibenden stammt. Hier wird gefordert, dass ein enger Zusammenhang " +
-                              "zwischen Dokument und Unterschrift besteht.");
-            Console.WriteLine("Warneigenschaft: Diese soll den Unterzeichnenden vor einer Übereilung " +
-                              "bewahren. Die handschriftliche Unterschrift ist hinreichend komplex, und " +
-                              "besteht zum Beispiel nicht nur aus einem Kreuz");
-            Console.WriteLine("Verifikationseigenschaft: Jeder Empfänger kann die Unterschrift, durch die Privat/Publik " +
-                              "Schlüssel verifizieren.");
-            Console.WriteLine("Nachteile/Fehler: keine überprüfung der Sinnhaftigkeit der Nachricht, akzeptanz von " +
-                              "unterschriebenen Nachrichten");
-            Console.WriteLine("k mehrfach verwenden, weil damit versucht werden kann k zu ermitteln. " +
-                              "Da k = log_alpha(c1) = log_alpha(alpha^k)\nc2 = m * p^k mod p => m = c2 * (p^k)^-1 mod p");
             if (k == 0 || k > p - 1)
             {
                 k = p - 2;
